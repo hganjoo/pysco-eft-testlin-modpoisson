@@ -80,7 +80,7 @@ def linear(
 
     logging.info("Start linear Multigrid")
     residual_err = 1e30
-    
+
     while residual_err > tolerance:
         V_cycle(x, rhs, param)
         residual_error_tmp = residual_error(x, rhs, h, param)
@@ -144,7 +144,7 @@ def FAS(
     logging.info("Start Full-Approximation Storage Multigrid")
     
     for _ in range(3):
-        V_cycle_FAS(x, b, param)
+        F_cycle_FAS(x, b, param)
         #print('xval:',x[0,0,0])
         residual_error_tmp = residual_error(x, b, h, param)
         print('reserr-FAS:',residual_error_tmp)
@@ -416,7 +416,7 @@ def smoothing(
             raise NotImplemented(
                 f"Only f(R) with n = 1 and 2, currently {param['fR_n']=}"
             )
-    elif param["compute_additional_field"] and "eft" == param["theory"].casefold():
+    elif param["compute_additional_field"] and "eftn" == param["theory"].casefold(): #change here
         if len(rhs) == 0:
             #print('eft nonrhs')
             quadratic.smoothing(x, b, h, 
