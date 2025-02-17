@@ -80,6 +80,7 @@ def linear(
 
     logging.info("Start linear Multigrid")
     residual_err = 1e30
+    
     while residual_err > tolerance:
         V_cycle(x, rhs, param)
         residual_error_tmp = residual_error(x, rhs, h, param)
@@ -142,11 +143,11 @@ def FAS(
     # Main procedure: Multigrid
     logging.info("Start Full-Approximation Storage Multigrid")
     
-    for _ in range(6):
-        F_cycle_FAS(x, b, param)
+    for _ in range(3):
+        V_cycle_FAS(x, b, param)
         #print('xval:',x[0,0,0])
-        #residual_error_tmp = residual_error(x, b, h, param)
-        #print('reserr:',residual_error_tmp)
+        residual_error_tmp = residual_error(x, b, h, param)
+        print('reserr-FAS:',residual_error_tmp)
     
     residual_error_tmp = residual_error(x, b, h, param)
     logging.info(f"FAS: {residual_error_tmp=} {tolerance=}")
@@ -745,7 +746,7 @@ def F_cycle_FAS(
         L_c = 0
         if nlevel >= (param["ncoarse"] - 3):
             #print('rese-xc-before:',residual_error(x_corr_c,b_c,two*h,param))
-            smoothing(x_corr_c, b_c, two * h, 2*param["Npre"], param, res_c)
+            smoothing(x_corr_c, b_c, two * h, param["Npre"], param, res_c)
             #print('rese-xc-before:',residual_error(x_corr_c,b_c,two*h,param))
         else:
             F_cycle_FAS(x_corr_c, b_c, param, nlevel + 1, res_c)

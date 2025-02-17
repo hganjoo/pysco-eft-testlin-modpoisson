@@ -906,17 +906,15 @@ def initialise_potential(
 
     
     """
-    xi = alphaB - alphaM
-    nu = -C2 - alphaB*(xi - alphaM)
-    mu_chi = 1 + xi*xi/nu
     
+    lfac = (alphaB - alphaM) / (2*alphaB*alphaM - alphaB**2 - C2)
     pi = np.empty_like(b)
     one_by_six = np.float32(1./6)
     ncells_1d = b.shape[0]
     for i in prange(ncells_1d):
         for j in prange(ncells_1d):
             for k in prange(ncells_1d):
-                pi[i, j, k] = - one_by_six*mu_chi*h*h*b[i,j,k]
+                pi[i, j, k] = - one_by_six*lfac*h*h*b[i,j,k]
     #print('Init F:',pi)
     
     return pi

@@ -420,17 +420,37 @@ def get_additional_field(
             )   
             f2 = -f1
 
-            dens_term = utils.linear_operator(density,f1,f2)
             
-
-            
-            additional_field = initialise_potential(
-                additional_field, dens_term, h, param,tables
-            )
-
 
             chi = additional_field
-            chi = multigrid.FAS(chi, dens_term, h, param)
+
+             # newtonian recasting
+
+            if param['newton']:
+
+                lapfac = (param["alphaB"] - param["alphaM"]) / (2*param["alphaB"]*param["alphaM"] - param["alphaB"]**2 - param["C2"])
+                print('Chi Laplacian Factor:',lapfac)
+                dens_term = utils.linear_operator(density,f1*lapfac,f2*lapfac)
+                additional_field = initialise_potential(
+                additional_field, dens_term, h, param,tables
+            )
+                chi = additional_field
+                chi = multigrid.linear(chi,dens_term,h,param)
+            
+            else:
+
+                dens_term = utils.linear_operator(density,f1,f2)
+                additional_field = initialise_potential(
+                additional_field, dens_term, h, param,tables
+            )
+                chi = additional_field
+                chi = multigrid.FAS(chi, dens_term, h, param)
+
+
+
+            
+            #
+            
             #quadratic.smoothing(chi,dens_term,h,param['C2'],param['C4'],param['alphaB'],param['alphaM'],param['H'],param['aexp'],6)
             return chi
 
