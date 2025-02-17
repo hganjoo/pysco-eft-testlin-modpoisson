@@ -145,8 +145,8 @@ def FAS(
     for _ in range(6):
         F_cycle_FAS(x, b, param)
         #print('xval:',x[0,0,0])
-        residual_error_tmp = residual_error(x, b, h, param)
-        print('reserr:',residual_error_tmp)
+        #residual_error_tmp = residual_error(x, b, h, param)
+        #print('reserr:',residual_error_tmp)
     
     residual_error_tmp = residual_error(x, b, h, param)
     logging.info(f"FAS: {residual_error_tmp=} {tolerance=}")
@@ -276,7 +276,7 @@ def residual_error(
         param["compute_additional_field"]
         and "eft" == param["theory"].casefold()
     ):
-        print('EFT-reserr')
+        #print('EFT-reserr')
         return quadratic.residual_error(x, b, h,
                                  param["C2"], param["C4"], 
                                  param["alphaB"],param["alphaM"],
@@ -744,9 +744,9 @@ def F_cycle_FAS(
         #print('resc:',res_c[0])
         L_c = 0
         if nlevel >= (param["ncoarse"] - 3):
-            print('rese-xc-before:',residual_error(x_corr_c,b_c,two*h,param))
+            #print('rese-xc-before:',residual_error(x_corr_c,b_c,two*h,param))
             smoothing(x_corr_c, b_c, two * h, 2*param["Npre"], param, res_c)
-            print('rese-xc-before:',residual_error(x_corr_c,b_c,two*h,param))
+            #print('rese-xc-before:',residual_error(x_corr_c,b_c,two*h,param))
         else:
             F_cycle_FAS(x_corr_c, b_c, param, nlevel + 1, res_c)
         res_c = 0

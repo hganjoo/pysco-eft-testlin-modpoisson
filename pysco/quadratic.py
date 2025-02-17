@@ -308,6 +308,7 @@ def solution_quadratic_equation_with_rhs(
 
 
 
+
 @njit(
     ["void(f4[:,:,::1], f4[:,:,::1], f4, f4, f4, f4, f4, f4, f4)"],
     fastmath=True,
@@ -352,7 +353,7 @@ def jacobi(
     for ix in range(-1,ncells_1d - 1):
             for iy in range(-1,ncells_1d - 1):
                 for iz in range(-1,ncells_1d - 1):
-                    pi[ix,iy,iz] = solution_quadratic_equation(pi_old,b[ix,iy,iz],ix,iy,iz,h,C2,C4,alphaB,alphaM,H,a)
+                    pi[ix,iy,iz] = solution_quadratic_equation(pi,b[ix,iy,iz],ix,iy,iz,h,C2,C4,alphaB,alphaM,H,a)
 
 
 @njit(
@@ -401,8 +402,157 @@ def jacobi_with_rhs(
     for ix in range(-1,ncells_1d - 1):
             for iy in range(-1,ncells_1d - 1):
                 for iz in range(-1,ncells_1d - 1):
-                    pi[ix,iy,iz] = solution_quadratic_equation_with_rhs(pi_old,b[ix,iy,iz],ix,iy,iz,h,C2,C4,alphaB,alphaM,H,a,rhs[ix,iy,iz])
-              
+                    pi[ix,iy,iz] = solution_quadratic_equation_with_rhs(pi,b[ix,iy,iz],ix,iy,iz,h,C2,C4,alphaB,alphaM,H,a,rhs[ix,iy,iz])
+
+
+@njit(
+    ["void(f4[:,:,::1], f4[:,:,::1], f4, f4, f4, f4, f4, f4, f4)"],
+    fastmath=True,
+    cache=True
+)
+def gauss_seidel(
+    x: npt.NDArray[np.float32],
+    b: npt.NDArray[np.float32],
+    h: np.float32,
+    C2: np.float32,
+    C4: np.float32,
+    alphaB: np.float32,
+    alphaM: np.float32,
+    H: np.float32,
+    a: np.float32,
+    ) -> None:
+    """Gauss-Seidel quadratic equation solver \\
+    Solve the roots of u in the equation: \\
+    a u^2 + bu + c = 0 \\
+    for the EFT in Cusin et al (2017)\\
+    
+    Parameters
+    ----------
+    x : npt.NDArray[np.float32]
+        Scalar field [N_cells_1d, N_cells_1d, N_cells_1d]
+    b : npt.NDArray[np.float32]
+        Density term [N_cells_1d, N_cells_1d, N_cells_1d]
+    h : np.float32
+        Grid size
+    C2, C4, alphaB, alphaM : np.float32
+        EFT params
+    H : np.float32
+        Dimensionless Hubble param E(a)
+    a : np.float32
+        scale factor
+    
+    """
+
+    half_ncells_1d = x.shape[0] >> 1
+    # Computation Red
+    for i in prange(x.shape[0] >> 1):
+        ii = 2 * i
+        iim1 = ii - 1
+        for j in prange(half_ncells_1d):
+            jj = 2 * j
+            jjm1 = jj - 1
+            for k in prange(half_ncells_1d):
+                kk = 2 * k
+                kkm1 = kk - 1
+
+                x[iim1, jjm1, kkm1] = solution_quadratic_equation(x,b[iim1,jjm1,kkm1],iim1,jjm1,kkm1,h,C2,C4,alphaB,alphaM,H,a)
+                x[iim1, jj, kk] = solution_quadratic_equation(x,b[iim1,jj,kk],iim1,jj,kk,h,C2,C4,alphaB,alphaM,H,a)
+                x[ii, jjm1, kk] = solution_quadratic_equation(x,b[ii,jjm1,kk],ii,jjm1,kk,h,C2,C4,alphaB,alphaM,H,a)
+                x[ii, jj, kkm1] = solution_quadratic_equation(x,b[ii,jj,kkm1],ii,jj,kkm1,h,C2,C4,alphaB,alphaM,H,a)
+
+    # Computation Black
+    for i in prange(half_ncells_1d):
+        ii = 2 * i
+        iim1 = ii - 1
+        for j in prange(half_ncells_1d):
+            jj = 2 * j
+            jjm1 = jj - 1
+            for k in prange(half_ncells_1d):
+                kk = 2 * k
+                kkm1 = kk - 1
+
+                x[iim1, jjm1, kk] = solution_quadratic_equation(x,b[iim1,jjm1,kk],iim1,jjm1,kk,h,C2,C4,alphaB,alphaM,H,a)
+                x[iim1, jj, kkm1] = solution_quadratic_equation(x,b[iim1,jj,kkm1],iim1,jj,kkm1,h,C2,C4,alphaB,alphaM,H,a)
+                x[ii, jjm1, kkm1] = solution_quadratic_equation(x,b[ii,jjm1,kkm1],ii,jjm1,kkm1,h,C2,C4,alphaB,alphaM,H,a)
+                x[ii, jj, kk] = solution_quadratic_equation(x,b[ii,jj,kk],ii,jj,kk,h,C2,C4,alphaB,alphaM,H,a)
+
+
+@njit(
+    ["void(f4[:,:,::1], f4[:,:,::1], f4, f4, f4, f4, f4, f4, f4, f4[:,:,::1])"],
+    fastmath=True,
+    cache=True
+)
+def gauss_seidel_with_rhs(
+    x: npt.NDArray[np.float32],
+    b: npt.NDArray[np.float32],
+    h: np.float32,
+    C2: np.float32,
+    C4: np.float32,
+    alphaB: np.float32,
+    alphaM: np.float32,
+    H: np.float32,
+    a: np.float32,
+    rhs: npt.NDArray[np.float32]
+    ) -> None:
+    """Gauss-Seidel quadratic equation solver with rhs term \\
+    Solve the roots of u in the equation: \\
+    a u^2 + bu + c = rhs \\
+    for the EFT in Cusin et al (2017)\\
+    
+    Parameters
+    ----------
+    x : npt.NDArray[np.float32]
+        Scalar field [N_cells_1d, N_cells_1d, N_cells_1d]
+    b : npt.NDArray[np.float32]
+        Density term [N_cells_1d, N_cells_1d, N_cells_1d]
+    h : np.float32
+        Grid size
+    C2, C4, alphaB, alphaM : np.float32
+        EFT params
+    H : np.float32
+        Dimensionless Hubble param E(a)
+    a : np.float32
+        scale factor
+    rhs: npt.NDArray[np.float32]
+        right hand side of the field equation [N_cells_1d, N_cells_1d, N_cells_1d]
+    
+    """
+
+    half_ncells_1d = x.shape[0] >> 1
+    # Computation Red
+    for i in prange(x.shape[0] >> 1):
+        ii = 2 * i
+        iim1 = ii - 1
+        for j in prange(half_ncells_1d):
+            jj = 2 * j
+            jjm1 = jj - 1
+            for k in prange(half_ncells_1d):
+                kk = 2 * k
+                kkm1 = kk - 1
+
+                x[iim1, jjm1, kkm1] = solution_quadratic_equation_with_rhs(x,b[iim1,jjm1,kkm1],iim1,jjm1,kkm1,h,C2,C4,alphaB,alphaM,H,a,rhs[iim1,jjm1,kkm1])
+                x[iim1, jj, kk] = solution_quadratic_equation_with_rhs(x,b[iim1,jj,kk],iim1,jj,kk,h,C2,C4,alphaB,alphaM,H,a,rhs[iim1,jj,kk])
+                x[ii, jjm1, kk] = solution_quadratic_equation_with_rhs(x,b[ii,jjm1,kk],ii,jjm1,kk,h,C2,C4,alphaB,alphaM,H,a,rhs[ii,jjm1,kk])
+                x[ii, jj, kkm1] = solution_quadratic_equation_with_rhs(x,b[ii,jj,kkm1],ii,jj,kkm1,h,C2,C4,alphaB,alphaM,H,a,rhs[ii,jj,kkm1])
+
+    # Computation Black
+    for i in prange(half_ncells_1d):
+        ii = 2 * i
+        iim1 = ii - 1
+        for j in prange(half_ncells_1d):
+            jj = 2 * j
+            jjm1 = jj - 1
+            for k in prange(half_ncells_1d):
+                kk = 2 * k
+                kkm1 = kk - 1
+
+                x[iim1, jjm1, kk] = solution_quadratic_equation_with_rhs(x,b[iim1,jjm1,kk],iim1,jjm1,kk,h,C2,C4,alphaB,alphaM,H,a,rhs[iim1,jjm1,kk])
+                x[iim1, jj, kkm1] = solution_quadratic_equation_with_rhs(x,b[iim1,jj,kkm1],iim1,jj,kkm1,h,C2,C4,alphaB,alphaM,H,a,rhs[iim1,jj,kkm1])
+                x[ii, jjm1, kkm1] = solution_quadratic_equation_with_rhs(x,b[ii,jjm1,kkm1],ii,jjm1,kkm1,h,C2,C4,alphaB,alphaM,H,a,rhs[ii,jjm1,kkm1])
+                x[ii, jj, kk] = solution_quadratic_equation_with_rhs(x,b[ii,jj,kk],ii,jj,kk,h,C2,C4,alphaB,alphaM,H,a,rhs[ii,jj,kk])
+
+
+
 
 def smoothing(
     pi: npt.NDArray[np.float32],
@@ -437,6 +587,7 @@ def smoothing(
     
     for _ in range(n_smoothing):
         jacobi(pi, b, h, C2, C4, alphaB, alphaM, H, a)
+        #gauss_seidel(pi, b, h, C2, C4, alphaB, alphaM, H, a)
 
 def smoothing_with_rhs(
     pi: npt.NDArray[np.float32],
@@ -472,6 +623,7 @@ def smoothing_with_rhs(
     
     for _ in range(n_smoothing):
         jacobi_with_rhs(pi, b, h, C2, C4, alphaB, alphaM, H, a, rhs)
+        #gauss_seidel_with_rhs(pi, b, h, C2, C4, alphaB, alphaM, H, a, rhs)
 
 
 
