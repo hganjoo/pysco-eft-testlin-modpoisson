@@ -559,7 +559,7 @@ def V_cycle(
     two = np.float32(2)
     f1 = np.float32(-4.0 / 6 * h**2)
     smoothing(x, b, h, param["Npre"], param)
-    res_c = restrict_residual(x, b, h, param, rhs)
+    res_c = restrict_residual(x, b, h, param)
     x_corr_c = utils.prod_vector_scalar(res_c, f1)
 
     if nlevel >= (param["ncoarse"] - 3):
