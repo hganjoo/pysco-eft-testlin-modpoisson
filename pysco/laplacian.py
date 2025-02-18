@@ -1204,4 +1204,5 @@ def smoothing(
 
     f_relax = np.float32(1.25)  # As in Kravtsov et al. 1997
     for _ in range(n_smoothing):
-        gauss_seidel(x, b, h, f_relax)
+        #gauss_seidel(x, b, h, f_relax)
+        jacobi(x, b, h)

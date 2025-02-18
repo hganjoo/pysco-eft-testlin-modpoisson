@@ -279,7 +279,7 @@ def initialise_potential(
                 )
         elif (
             param["compute_additional_field"]
-            and "eft" == param["theory"].casefold()
+            and "eftde" == param["theory"].casefold() #change
         ):
             potential = quadratic.initialise_potential(rhs,h,param["C2"],param["alphaB"],param["alphaM"]
                                                        )
@@ -430,12 +430,13 @@ def get_additional_field(
 
                 lapfac = (param["alphaB"] - param["alphaM"]) / (2*param["alphaB"]*param["alphaM"] - param["alphaB"]**2 - param["C2"])
                 print('Chi Laplacian Factor:',lapfac)
-                dens_term = utils.linear_operator(density,f1*lapfac,f2*lapfac)
+                dens_term = utils.linear_operator(density,f1,f2)
                 additional_field = initialise_potential(
-                additional_field, dens_term, h, param,tables
+                additional_field, lapfac*dens_term, h, param,tables
             )
                 chi = additional_field
-                chi = multigrid.linear(chi,dens_term,h,param)
+                print('Chi MG:')
+                chi = multigrid.linear(chi,lapfac*dens_term,h,param)
             
             else:
 

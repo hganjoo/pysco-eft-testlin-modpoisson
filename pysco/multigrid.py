@@ -62,6 +62,7 @@ def linear(
     THEORY = param["theory"].casefold()
     if param["compute_additional_field"] and "fr" == THEORY:
         tolerance = 1e-20  # For scalaron field do not use any tolerance threshold but rather a convergence of residual
+
     else:
         if (not "tolerance" in param) or (param["nsteps"] % 3) == 0:
             logging.info("Compute Truncation error")
@@ -275,7 +276,7 @@ def residual_error(
             )
     elif (
         param["compute_additional_field"]
-        and "eft" == param["theory"].casefold()
+        and "eftde" == param["theory"].casefold() #change
     ):
         #print('EFT-reserr')
         return quadratic.residual_error(x, b, h,
@@ -345,7 +346,7 @@ def restrict_residual(
         
     elif (
         param["compute_additional_field"]
-        and "eft" == param["theory"].casefold()
+        and "eftde" == param["theory"].casefold() #change
     ):
         if len(rhs)==0:
             return mesh.restriction(quadratic.residual(x, b, h, 
