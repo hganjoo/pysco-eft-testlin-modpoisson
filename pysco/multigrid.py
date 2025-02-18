@@ -520,7 +520,7 @@ def operator(
                 f"Only f(R) with n = 1 and 2, currently {param['fR_n']=}"
             )
         
-    elif param["compute_additional_field"] and "eftde" == param["theory"].casefold() and (not param["newton"]):
+    elif param["compute_additional_field"] and "eft" == param["theory"].casefold() and (not param["newton"]):
         
         return quadratic.operator(x, b, h,
                         param["C2"], param["C4"],
