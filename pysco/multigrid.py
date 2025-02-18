@@ -294,6 +294,7 @@ def restrict_residual(
     b: npt.NDArray[np.float32],
     h: np.float32,
     param: pd.Series,
+    rhs: npt.NDArray[np.float32] = np.empty(0, dtype=np.float32),
 ) -> npt.NDArray[np.float32]:
     """Restricts the residual of the field
 
@@ -353,7 +354,10 @@ def restrict_residual(
                             param["aexp"]
                              ) )
     else:
-        return laplacian.restrict_residual(x, b, h)
+        if len(rhs) == 0:
+            return laplacian.restrict_residual(x, b, h)
+        else:
+            return laplacian.restrict_residual(x, rhs, h)
         # return laplacian.restrict_residual_half(x, b, h)
 
 
@@ -416,7 +420,7 @@ def smoothing(
             raise NotImplemented(
                 f"Only f(R) with n = 1 and 2, currently {param['fR_n']=}"
             )
-    elif param["compute_additional_field"] and "eftn" == param["theory"].casefold(): #change here
+    elif param["compute_additional_field"] and "eft-non" == param["theory"].casefold(): #change here
         if len(rhs) == 0:
             #print('eft nonrhs')
             quadratic.smoothing(x, b, h, 
@@ -437,7 +441,10 @@ def smoothing(
             
     
     else:
-        laplacian.smoothing(x, b, h, n_smoothing)
+        if len(rhs) == 0:
+            laplacian.smoothing(x, b, h, n_smoothing)
+        else:
+            laplacian.smoothing(x, rhs, h, n_smoothing)
 
 
 def operator(
