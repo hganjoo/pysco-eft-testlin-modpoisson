@@ -559,7 +559,7 @@ def V_cycle(
     two = np.float32(2)
     f1 = np.float32(-4.0 / 6 * h**2)
     smoothing(x, b, h, param["Npre"], param)
-    res_c = restrict_residual(x, b, h, param)
+    res_c = restrict_residual(x, b, h, param, rhs)
     x_corr_c = utils.prod_vector_scalar(res_c, f1)
 
     if nlevel >= (param["ncoarse"] - 3):
@@ -612,7 +612,7 @@ def V_cycle_FAS(
     h = np.float32(0.5 ** (param["ncoarse"] - nlevel))
     two = np.float32(2)
     smoothing(x, b, h, param["Npre"], param, rhs)
-    res_c = restrict_residual(x, b, h, param)
+    res_c = restrict_residual(x, b, h, param, rhs)
     x_c = mesh.restriction(x)
     x_corr_c = x_c.copy()
     b_c = mesh.restriction(b)
@@ -743,7 +743,7 @@ def F_cycle_FAS(
     #print('After sm1:',residual_error(x, b, h, param)) # debug
     if param['domg']:
 
-        res_c = restrict_residual(x, b, h, param)
+        res_c = restrict_residual(x, b, h, param, rhs)
         x_c = mesh.restriction(x)
         x_corr_c = x_c.copy()
         b_c = mesh.restriction(b)
@@ -767,7 +767,7 @@ def F_cycle_FAS(
         #print('After add1:',residual_error(x, b, h, param)) # debug
         smoothing(x, b, h, param["Npre"], param, rhs)
         #print('After sm2:',residual_error(x, b, h, param)) # debug
-        res_c = restrict_residual(x, b, h, param)
+        res_c = restrict_residual(x, b, h, param, rhs)
         x_c = mesh.restriction(x)
         x_corr_c = x_c.copy()
         L_c = operator(x_c, two * h, param, b_c)
@@ -893,7 +893,7 @@ def W_cycle_FAS(
     h = np.float32(0.5 ** (param["ncoarse"] - nlevel))
     two = np.float32(2)
     smoothing(x, b, h, param["Npre"], param, rhs)
-    res_c = restrict_residual(x, b, h, param)
+    res_c = restrict_residual(x, b, h, param, rhs)
     x_c = mesh.restriction(x)
     x_corr_c = x_c.copy()
     b_c = mesh.restriction(b)
@@ -912,7 +912,7 @@ def W_cycle_FAS(
     x_corr_c = 0
     smoothing(x, b, h, param["Npre"], param, rhs)
 
-    res_c = restrict_residual(x, b, h, param)
+    res_c = restrict_residual(x, b, h, param, rhs)
     x_c = mesh.restriction(x)
     x_corr_c = x_c.copy()
     L_c = operator(x_c, two * h, param, b_c)
