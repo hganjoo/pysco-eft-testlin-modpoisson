@@ -347,7 +347,15 @@ def restrict_residual(
         param["compute_additional_field"]
         and "eft" == param["theory"].casefold()
     ):
-        return mesh.restriction(quadratic.residual(x, b, h, 
+        if len(rhs)==0:
+            return mesh.restriction(quadratic.residual(x, b, h, 
+                            param["C2"], param["C4"],
+                            param["alphaB"],param["alphaM"],
+                            param["H"],
+                            param["aexp"]
+                             ) )
+        else:
+            return mesh.restriction(rhs + quadratic.residual(x, b, h, 
                             param["C2"], param["C4"],
                             param["alphaB"],param["alphaM"],
                             param["H"],
@@ -453,6 +461,7 @@ def operator(
     h: np.float32,
     param: pd.Series,
     b: npt.NDArray[np.float32] = np.empty(0, dtype=np.float32),
+    rhs: npt.NDArray[np.float32] = np.empty(0, dtype=np.float32),
 ) -> npt.NDArray[np.float32]:
     """Smooth field with several Gauss-Seidel iterations \\
     Depending on the theory of gravity and if we compute the additional field or the main field
@@ -512,12 +521,20 @@ def operator(
             )
         
     elif param["compute_additional_field"] and "eft" == param["theory"].casefold():
-        return quadratic.operator(x, b, h,
+        if len(rhs) == 0:
+            return quadratic.operator(x, b, h,
                            param["C2"], param["C4"],
                            param["alphaB"],param["alphaM"],
                            param["H"],
                            param["aexp"]
                            )
+        else:
+            return quadratic.operator(x, b, h,
+                           param["C2"], param["C4"],
+                           param["alphaB"],param["alphaM"],
+                           param["H"],
+                           param["aexp"]
+                           ) - rhs
     else:
         return laplacian.operator(x, h)
 
