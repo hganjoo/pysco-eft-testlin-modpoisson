@@ -279,7 +279,7 @@ def initialise_potential(
                 )
         elif (
             param["compute_additional_field"]
-            and "eftde" == param["theory"].casefold() #change
+            and "eft" == param["theory"].casefold() and (not param["newton"]) #change
         ):
             potential = quadratic.initialise_potential(rhs,h,param["C2"],param["alphaB"],param["alphaM"]
                                                        )
@@ -436,7 +436,7 @@ def get_additional_field(
             )
                 chi = additional_field
                 print('Chi MG:')
-                chi = multigrid.linear(chi,lapfac*dens_term,h,param)
+                chi = multigrid.FAS(chi,lapfac*dens_term,h,param)
             
             else:
 
