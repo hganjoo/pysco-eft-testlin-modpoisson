@@ -461,7 +461,6 @@ def operator(
     h: np.float32,
     param: pd.Series,
     b: npt.NDArray[np.float32] = np.empty(0, dtype=np.float32),
-    rhs: npt.NDArray[np.float32] = np.empty(0, dtype=np.float32),
 ) -> npt.NDArray[np.float32]:
     """Smooth field with several Gauss-Seidel iterations \\
     Depending on the theory of gravity and if we compute the additional field or the main field
@@ -521,20 +520,14 @@ def operator(
             )
         
     elif param["compute_additional_field"] and "eft" == param["theory"].casefold():
-        if len(rhs) == 0:
-            return quadratic.operator(x, b, h,
-                           param["C2"], param["C4"],
-                           param["alphaB"],param["alphaM"],
-                           param["H"],
-                           param["aexp"]
-                           )
-        else:
-            return quadratic.operator(x, b, h,
-                           param["C2"], param["C4"],
-                           param["alphaB"],param["alphaM"],
-                           param["H"],
-                           param["aexp"]
-                           ) - rhs
+        
+        return quadratic.operator(x, b, h,
+                        param["C2"], param["C4"],
+                        param["alphaB"],param["alphaM"],
+                        param["H"],
+                        param["aexp"]
+                        )
+        
     else:
         return laplacian.operator(x, h)
 
