@@ -439,6 +439,8 @@ def get_additional_field(
             
             else:
 
+                print('Full solver.')
+
                 dens_term = utils.linear_operator(density,f1,f2)
                 additional_field = initialise_potential(
                 additional_field, dens_term, h, param,tables

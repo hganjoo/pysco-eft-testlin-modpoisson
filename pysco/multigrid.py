@@ -143,7 +143,7 @@ def FAS(
     # Main procedure: Multigrid
     logging.info("Start Full-Approximation Storage Multigrid")
     
-    for _ in range(3):
+    for _ in range(1):
         F_cycle_FAS(x, b, param)
         #print('xval:',x[0,0,0])
         residual_error_tmp = residual_error(x, b, h, param)
@@ -420,7 +420,7 @@ def smoothing(
             raise NotImplemented(
                 f"Only f(R) with n = 1 and 2, currently {param['fR_n']=}"
             )
-    elif param["compute_additional_field"] and "eft-non" == param["theory"].casefold(): #change here
+    elif param["compute_additional_field"] and "eft" == param["theory"].casefold() and (not param["newton"]): #change here
         if len(rhs) == 0:
             #print('eft nonrhs')
             quadratic.smoothing(x, b, h, 
@@ -430,7 +430,7 @@ def smoothing(
                                 param["aexp"],
                                 n_smoothing)
         else:
-            #print('Smoothing RHS EFT')
+            print('Smoothing RHS EFT')
             quadratic.smoothing_with_rhs(x, b, h, 
                                 param["C2"], param["C4"],
                                 param["alphaB"],param["alphaM"],
@@ -441,6 +441,7 @@ def smoothing(
             
     
     else:
+        #print('laps')
         if len(rhs) == 0:
             laplacian.smoothing(x, b, h, n_smoothing)
         else:
