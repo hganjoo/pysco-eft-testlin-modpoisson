@@ -436,7 +436,7 @@ def get_additional_field(
             )
                 chi = additional_field
                 print('Chi MG:')
-                chi = multigrid.FAS(chi,lapfac*dens_term,h,param)
+                chi = multigrid.linear(chi,lapfac*dens_term,h,param)
             
             else:
 

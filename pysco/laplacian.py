@@ -1202,7 +1202,7 @@ def smoothing(
         # No over-relaxation because half-residual / restriction
         gauss_seidel_no_overrelaxation(x, b, h) """
 
-    f_relax = np.float32(1)  # As in Kravtsov et al. 1997
+    f_relax = np.float32(1.25)  # As in Kravtsov et al. 1997
     for _ in range(n_smoothing):
         gauss_seidel(x, b, h, f_relax)
         #jacobi(x, b, h)
