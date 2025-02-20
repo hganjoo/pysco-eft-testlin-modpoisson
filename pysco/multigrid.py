@@ -624,7 +624,7 @@ def V_cycle_FAS(
     h = np.float32(0.5 ** (param["ncoarse"] - nlevel))
     two = np.float32(2)
     smoothing(x, b, h, param["Npre"], param, rhs)
-    res_c = 4*restrict_residual(x, b, h, param, rhs)
+    res_c = restrict_residual(x, b, h, param, rhs)
     x_c = mesh.restriction(x)
     x_corr_c = x_c.copy()
     b_c = mesh.restriction(b)
@@ -755,7 +755,7 @@ def F_cycle_FAS(
     #print('After sm1:',residual_error(x, b, h, param)) # debug
     if param['domg']:
 
-        res_c = 4*restrict_residual(x, b, h, param, rhs)
+        res_c = restrict_residual(x, b, h, param, rhs)
         x_c = mesh.restriction(x)
         x_corr_c = x_c.copy()
         b_c = mesh.restriction(b)
@@ -779,7 +779,7 @@ def F_cycle_FAS(
         #print('After add1:',residual_error(x, b, h, param)) # debug
         smoothing(x, b, h, param["Npre"], param, rhs)
         #print('After sm2:',residual_error(x, b, h, param)) # debug
-        res_c = 4*restrict_residual(x, b, h, param, rhs)
+        res_c = restrict_residual(x, b, h, param, rhs)
         x_c = mesh.restriction(x)
         x_corr_c = x_c.copy()
         L_c = operator(x_c, two * h, param, b_c)
